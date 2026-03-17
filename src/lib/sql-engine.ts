@@ -25,6 +25,13 @@ export interface SQLResult {
 const fmt = (v: number): string =>
   v.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
+function inferQueryIntent(query: string): "highest" | "lowest" | "generic" {
+  const normalized = query.toLowerCase();
+  if (/\b(lowest|least|minimum|min)\b/.test(normalized)) return "lowest";
+  if (/\b(highest|most|maximum|max)\b/.test(normalized)) return "highest";
+  return "generic";
+}
+
 function toLabel(colName: string): string {
   return colName
     .replace(/_/g, " ")
@@ -443,13 +450,14 @@ export function deriveChartsFromSQL(result: SQLResult, sqlPlan: SQLQueryPlan): C
 
 export function buildAnswerFromSQL(
   result: SQLResult,
-  _query: string,
+  query: string,
   sqlPlan: SQLQueryPlan
 ): string {
   if (result.error) return "Query failed — showing full dataset.";
   if (result.rowCount === 0) return "No rows matched your query.";
 
   const parts: string[] = [];
+  const intent = inferQueryIntent(query);
 
   if (result.isScalar) {
     const row = result.rows[0];
@@ -464,7 +472,6 @@ export function buildAnswerFromSQL(
   } else {
     // Use totalBeforeLimit so "SELECT * LIMIT 500" shows the real count, not 500
     const displayCount = result.totalBeforeLimit ?? result.rowCount;
-    parts.push(`Found **${displayCount.toLocaleString()} rows** matching your query.`);
 
     if (
       sqlPlan.xColumn && sqlPlan.yColumn &&
@@ -475,8 +482,20 @@ export function buildAnswerFromSQL(
       const topLabel = String(top[sqlPlan.xColumn] ?? "");
       const topValue = Number(top[sqlPlan.yColumn] ?? 0);
       if (topLabel && !isNaN(topValue)) {
-        parts.push(`**${topLabel}** leads with **${fmt(topValue)}**.`);
+        const metricLabel = toLabel(sqlPlan.yColumn);
+        if (intent === "lowest") {
+          parts.push(`**${topLabel}** has the lowest **${metricLabel}** at **${fmt(topValue)}**.`);
+        } else if (intent === "highest") {
+          parts.push(`**${topLabel}** has the highest **${metricLabel}** at **${fmt(topValue)}**.`);
+        } else {
+          parts.push(`Found **${displayCount.toLocaleString()} rows** matching your query.`);
+          parts.push(`**${topLabel}** leads with **${fmt(topValue)}**.`);
+        }
+      } else {
+        parts.push(`Found **${displayCount.toLocaleString()} rows** matching your query.`);
       }
+    } else {
+      parts.push(`Found **${displayCount.toLocaleString()} rows** matching your query.`);
     }
   }
 

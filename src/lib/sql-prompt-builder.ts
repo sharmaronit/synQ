@@ -91,9 +91,16 @@ average of                 | SELECT AVG(\`col\`) as avg_col FROM data WHERE ...
 sum / total of             | SELECT SUM(\`col\`) as total_col FROM data WHERE ...
 max / highest              | SELECT MAX(\`col\`) as max_col FROM data
 min / lowest               | SELECT MIN(\`col\`) as min_col FROM data
-which X has most Y         | SELECT \`X\`, SUM(\`Y\`) as total_y FROM data GROUP BY \`X\` ORDER BY total_y DESC LIMIT 20
+which X has most/highest Y | SELECT \`X\`, SUM(\`Y\`) as total_y FROM data GROUP BY \`X\` ORDER BY total_y DESC LIMIT 1
+which X has least/lowest Y | SELECT \`X\`, SUM(\`Y\`) as total_y FROM data GROUP BY \`X\` ORDER BY total_y ASC LIMIT 1
 distribution / breakdown   | SELECT \`X\`, COUNT(*) as count FROM data GROUP BY \`X\` ORDER BY count DESC LIMIT 30
 trend over time            | SELECT \`date_col\`, SUM(\`val\`) as total FROM data GROUP BY \`date_col\` ORDER BY \`date_col\`
+
+For superlative questions like "which region has the lowest views?" or "which category has the highest revenue?":
+- return exactly one best-matching row with LIMIT 1 unless the user explicitly asks for top N / bottom N
+- use ORDER BY ASC for lowest / least / minimum queries
+- use ORDER BY DESC for highest / most / maximum queries
+- when the question asks "which X", prefer grouped ranking output over a scalar MIN()/MAX() whenever X is a dimension column
 
 ━━━ CHART TYPE GUIDE ━━━
 

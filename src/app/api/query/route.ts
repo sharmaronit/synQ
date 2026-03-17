@@ -4,6 +4,35 @@ import { validatePlanAgainstSchema, autoCorrectPlan } from "@/lib/schema-validat
 import { buildSQLPrompt } from "@/lib/sql-prompt-builder";
 import { generateMockPlan } from "@/lib/mock-gemini";
 
+function normalizeSQLPlanForQuery(query: string, sqlPlan: SQLQueryPlan): SQLQueryPlan {
+  const normalizedQuery = query.toLowerCase();
+  const wantsLowest = /\b(lowest|least|minimum|min)\b/.test(normalizedQuery);
+  const wantsHighest = /\b(highest|most|maximum|max)\b/.test(normalizedQuery);
+  const asksForSingleWinner = /\b(which|what)\b/.test(normalizedQuery) && !/\b(top|bottom)\s+\d+\b/.test(normalizedQuery);
+  const hasGroupBy = /\bGROUP\s+BY\b/i.test(sqlPlan.sql);
+  const orderMatch = sqlPlan.sql.match(/\bORDER\s+BY\s+([\w`\[\]\s]+?)(?:\s+(ASC|DESC))?(?=\s+LIMIT\b|\s*$)/i);
+
+  if ((!wantsLowest && !wantsHighest) || !asksForSingleWinner || !hasGroupBy || !orderMatch) {
+    return sqlPlan;
+  }
+
+  const desiredDirection = wantsLowest ? "ASC" : "DESC";
+  let sql = sqlPlan.sql.replace(/\bORDER\s+BY\s+([\w`\[\]\s]+?)(?:\s+(ASC|DESC))?(?=\s+LIMIT\b|\s*$)/i, (_match, expr) => {
+    return `ORDER BY ${String(expr).trim()} ${desiredDirection}`;
+  });
+
+  if (/\bLIMIT\s+\d+\b/i.test(sql)) {
+    sql = sql.replace(/\bLIMIT\s+\d+\b/i, "LIMIT 1");
+  } else {
+    sql = `${sql} LIMIT 1`;
+  }
+
+  return {
+    ...sqlPlan,
+    sql,
+  };
+}
+
 // Build a minimal AnalyticsPlan stub from an SQLQueryPlan.
 // Carries title / description / insights for the UI; kpis/charts derived client-side.
 function buildStubPlan(sqlPlan: SQLQueryPlan): AnalyticsPlan {
@@ -64,7 +93,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       let sqlPlan: SQLQueryPlan;
       try {
-        sqlPlan = JSON.parse(responseText) as SQLQueryPlan;
+        sqlPlan = normalizeSQLPlanForQuery(query, JSON.parse(responseText) as SQLQueryPlan);
       } catch {
         return NextResponse.json(
           { message: "GitHub Models returned invalid JSON", code: "PARSE_ERROR", details: responseText.slice(0, 500) },
@@ -95,7 +124,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       let sqlPlan: SQLQueryPlan;
       try {
-        sqlPlan = JSON.parse(responseText) as SQLQueryPlan;
+        sqlPlan = normalizeSQLPlanForQuery(query, JSON.parse(responseText) as SQLQueryPlan);
       } catch {
         return NextResponse.json(
           { message: "Gemini returned invalid JSON", code: "PARSE_ERROR", details: responseText.slice(0, 500) },
