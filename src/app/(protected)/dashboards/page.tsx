@@ -33,8 +33,8 @@ export default async function DashboardsPage() {
             {isSetupRequired ? getDashboardsSetupMessage() : error.message}
           </p>
           <div className="flex items-center gap-4 text-sm">
-            <Link href="/dashboard" className="underline" style={{ color: "var(--color-sage-dark)" }}>
-              Back to workspace
+            <Link href="/dashboards" className="underline" style={{ color: "var(--color-sage-dark)" }}>
+              Back to dashboards
             </Link>
             {isSetupRequired && (
               <span style={{ color: "var(--color-text-muted)" }}>
@@ -52,11 +52,11 @@ export default async function DashboardsPage() {
       <div className="max-w-5xl mx-auto">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: "var(--color-sage-dark)" }}>Saved Dashboards</h1>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Select a dashboard to view and compare.</p>
+            <h1 className="text-3xl font-bold" style={{ color: "var(--color-sage-dark)" }}>Your Dashboards</h1>
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>Review saved dashboards, then start a new one from the upload workspace.</p>
           </div>
           <Link href="/dashboard" className="px-4 py-2 rounded-lg text-sm font-semibold" style={{ background: "var(--color-sage)", color: "white" }}>
-            Open Workspace
+            New Dashboard
           </Link>
         </div>
 
@@ -84,9 +84,9 @@ export default async function DashboardsPage() {
 
         {(data ?? []).length === 0 && (
           <div className="rounded-2xl p-8 border text-center mt-6" style={{ background: "rgba(250,246,240,0.82)", borderColor: "var(--color-surface-border)" }}>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No saved dashboards yet. Save one from your workspace.</p>
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>No saved dashboards yet. Create one by uploading a dataset and saving the result.</p>
             <Link href="/dashboard" className="inline-block mt-3 underline text-sm" style={{ color: "var(--color-sage-dark)" }}>
-              Go to workspace
+              Create your first dashboard
             </Link>
           </div>
         )}

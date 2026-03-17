@@ -38,8 +38,8 @@ export default async function DashboardDetailPage({ params }: PageProps) {
             {getDashboardsSetupMessage()}
           </p>
           <div className="flex items-center gap-4 text-sm">
-            <Link href="/dashboard" className="underline" style={{ color: "var(--color-sage-dark)" }}>
-              Back to workspace
+            <Link href="/dashboards" className="underline" style={{ color: "var(--color-sage-dark)" }}>
+              Back to dashboards
             </Link>
             <span style={{ color: "var(--color-text-muted)" }}>
               File to run: supabase/schema.sql
@@ -70,7 +70,7 @@ export default async function DashboardDetailPage({ params }: PageProps) {
               Back
             </Link>
             <Link href="/dashboard" className="px-3 py-2 rounded-lg text-sm font-semibold" style={{ background: "var(--color-sage)", color: "white" }}>
-              Workspace
+              New Dashboard
             </Link>
           </div>
         </div>

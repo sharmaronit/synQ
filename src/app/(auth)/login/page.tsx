@@ -9,7 +9,7 @@ import { SynqLogo } from "@/components/synq-logo";
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = useMemo(() => searchParams.get("next") ?? "/dashboard", [searchParams]);
+  const nextPath = useMemo(() => searchParams.get("next") ?? "/dashboards", [searchParams]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

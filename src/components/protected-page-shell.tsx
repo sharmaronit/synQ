@@ -32,7 +32,7 @@ export function ProtectedPageShell({ children, userEmail, datasetName }: Protect
           <Navbar
             datasetName={datasetName}
             userEmail={userEmail}
-            onHome={() => router.push("/dashboard")}
+            onHome={() => router.push("/dashboards")}
             onOpenSavedDashboards={handleOpenSavedDashboards}
             onSwitchAccount={handleSwitchAccount}
             onSignOut={handleSwitchAccount}
