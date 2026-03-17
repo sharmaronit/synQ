@@ -71,14 +71,15 @@ function StepIndicator({ step, doneSteps }: { step: string; doneSteps?: string[]
 function MessageBubble({ msg, onSuggestion, isLoading, onViewDashboard }: { msg: ChatMessage; onSuggestion: (s: string) => void; isLoading: boolean; onViewDashboard?: (snapshot: DashboardSnapshot) => void }) {
   const isUser = msg.role === "user";
   const [sqlOpen, setSqlOpen] = useState(false);
+  const responseSnapshot = msg.responseSnapshot;
 
   if (isUser) {
     return (
       <div className="flex justify-end mb-3">
         <div className="flex items-start gap-2 max-w-full min-w-0">
-          {msg.responseSnapshot && onViewDashboard && (
+          {responseSnapshot && onViewDashboard && (
             <button
-              onClick={() => onViewDashboard(msg.responseSnapshot)}
+              onClick={() => onViewDashboard(responseSnapshot)}
               className="h-6 px-2 rounded-md text-[10px] font-medium border transition-all duration-150 cursor-pointer flex-shrink-0"
               style={{
                 background: "transparent",

@@ -390,8 +390,9 @@ export function useQueryHandler() {
 
           completeStep("Schema validated — running computations...", "Computing results...");
           const allColumns = state.dataset.schema.columns.map((c) => c.name);
-          const results = await executePlanInWorker(state.dataset.rows, data.plan, undefined, { allColumns }).catch(
-            () => executePlan(state.dataset.rows, data.plan, undefined, { allColumns })
+          const datasetRows = state.dataset.rows;
+          const results = await executePlanInWorker(datasetRows, data.plan, undefined, { allColumns }).catch(
+            () => executePlan(datasetRows, data.plan, undefined, { allColumns })
           );
 
           done.push(`Results computed — ${results.kpis.length} KPIs, ${results.charts.length} charts`);
@@ -476,8 +477,9 @@ export function useQueryHandler() {
           done.push("AI unavailable — generating fallback...");
           pushStep("Generating fallback dashboard...");
           const fallbackPlan = generateFallbackPlan(state.dataset.schema);
-          const fallbackResults = await executePlanInWorker(state.dataset.rows, fallbackPlan).catch(
-            () => executePlan(state.dataset.rows, fallbackPlan)
+          const datasetRows = state.dataset.rows;
+          const fallbackResults = await executePlanInWorker(datasetRows, fallbackPlan).catch(
+            () => executePlan(datasetRows, fallbackPlan)
           );
           dispatch({
             type: "SET_DASHBOARD_RESULTS",
